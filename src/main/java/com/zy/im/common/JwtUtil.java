@@ -1,5 +1,6 @@
 package com.zy.im.common;
 
+import com.zy.im.common.security.JwtUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
@@ -34,45 +35,29 @@ public class JwtUtil {
     /**
      * 解析 Claims
      */
-    private static Claims parseToken(String token) {
+    public static JwtUser parseToken(String token) {
         try {
-            return Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(KEY)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+
+            Long userId = claims.get("userId", Long.class);
+            String username = claims.get("username", String.class);
+            return new JwtUser(userId, username);
         } catch (JwtException e) {
-            return null;
+            throw new RuntimeException("Invalid JWT token", e);
         }
     }
 
-    /**
-     * 获取 userId
-     */
+    /** 获取 userId */
     public static Long getUserId(String token) {
-        Claims claims = parseToken(token);
-        if (claims == null) {
-            return null;
-        }
-        return Long.valueOf(claims.getSubject());
+        return parseToken(token).getUserId();
     }
 
-    /**
-     * 获取 username
-     */
+    /** 获取 username */
     public static String getUsername(String token) {
-        Claims claims = parseToken(token);
-        if (claims == null) {
-            return null;
-        }
-        return claims.get("username", String.class);
-    }
-
-    /**
-     * 校验 token 是否有效
-     */
-    public static boolean isValid(String token) {
-        Claims claims = parseToken(token);
-        return claims != null && claims.getExpiration().after(new Date());
+        return parseToken(token).getUsername();
     }
 }
