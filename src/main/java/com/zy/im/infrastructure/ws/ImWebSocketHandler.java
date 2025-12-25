@@ -8,8 +8,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class ImWebSocketHandler extends TextWebSocketHandler {
 

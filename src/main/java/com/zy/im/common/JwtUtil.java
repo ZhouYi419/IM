@@ -3,10 +3,12 @@ package com.zy.im.common;
 import com.zy.im.common.security.JwtUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 public class JwtUtil {
 
     private static final String SECRET =
@@ -43,9 +45,10 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
 
-            Long userId = claims.get("userId", Long.class);
+            String userId = claims.getSubject();
+            log.info("获取到userId:{}",userId);
             String username = claims.get("username", String.class);
-            return new JwtUser(userId, username);
+            return new JwtUser(Long.valueOf(userId), username);
         } catch (JwtException e) {
             throw new RuntimeException("Invalid JWT token", e);
         }

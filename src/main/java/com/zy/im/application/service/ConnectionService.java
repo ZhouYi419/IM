@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
-
 import java.util.Objects;
 
 @Service
@@ -19,6 +18,7 @@ public class ConnectionService {
 
     public void onConnect(WebSocketSession session) {
         String token = getToken(session);
+        log.info("获取到token{}",token);
         JwtUser jwtUser = JwtUtil.parseToken(token);
 
         Long userId = jwtUser.getUserId();
