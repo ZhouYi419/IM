@@ -63,4 +63,23 @@ public class JwtUtil {
     public static String getUsername(String token) {
         return parseToken(token).getUsername();
     }
+
+    /**
+     * 获取过期时间
+     * @param token token
+     * @return 过期时间
+     */
+    public static Long getExpiration(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getExpiration().getTime();  // 返回过期时间的毫秒数
+        } catch (JwtException e) {
+            throw new RuntimeException("Invalid JWT token", e);
+        }
+    }
 }

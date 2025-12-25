@@ -23,7 +23,6 @@ public class LoginController {
     public BaseResponse<LoginResponse> login(@RequestBody @Validated LoginRequest loginRequest) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
-        String token = loginService.login(username, password);
-        return ResultUtils.success(new LoginResponse(token));
+        return ResultUtils.success(loginService.login(username, password));
     }
 }

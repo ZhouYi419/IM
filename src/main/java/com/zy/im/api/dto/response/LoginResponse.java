@@ -14,13 +14,6 @@ public class LoginResponse {
      */
     private Long expired;
 
-    public LoginResponse() {
-    }
-
-    public LoginResponse(String token) {
-        this.token = token;
-    }
-
     public LoginResponse(String token, Long expired) {
         this.token = token;
         this.expired = expired;

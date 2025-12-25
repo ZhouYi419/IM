@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +31,17 @@ public class ConnectionService {
         log.info("session {} disconnected", session.getId());
     }
 
+    /**
+     * 从请求头获取 Token
+     */
     private String getToken(WebSocketSession session) {
-        return Objects.requireNonNull(session.getUri())
-                .getQuery()
-                .replace("token=", "");
+        // 获取请求头中的 "Authorization" 字段
+        String authHeader = session.getHandshakeHeaders().getFirst("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7); // 去掉 "Bearer " 前缀
+        }
+        throw new IllegalArgumentException("Authorization header is missing or invalid");
     }
 }
 

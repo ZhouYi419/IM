@@ -1,5 +1,6 @@
 package com.zy.im.application.service;
 
+import com.zy.im.api.dto.response.LoginResponse;
 import com.zy.im.common.JwtUtil;
 import com.zy.im.common.exception.BusinessException;
 import com.zy.im.common.exception.ErrorCode;
@@ -16,7 +17,7 @@ public class LoginService {
         this.userMapper = userMapper;
     }
 
-    public String login(String username, String password) {
+    public LoginResponse login(String username, String password) {
         User user = userMapper.findByUsername(username);
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
@@ -24,6 +25,13 @@ public class LoginService {
         if (!user.getPassword().equals(password)) {
             throw new BusinessException(ErrorCode.PASSWORD_ERROR);
         }
-        return JwtUtil.generateToken(user.getId(), user.getUsername());
+        // 生成 token
+        String token = JwtUtil.generateToken(user.getId(), user.getUsername());
+
+        // 获取 token 过期时间
+        Long expired = JwtUtil.getExpiration(token);
+
+        // 返回包含 token 和过期时间的响应
+        return new LoginResponse(token, expired);
     }
 }
