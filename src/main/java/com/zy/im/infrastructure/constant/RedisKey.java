@@ -5,4 +5,6 @@ public final class RedisKey {
     public static final String ONLINE_USER = "online:user:";
     // 在线session
     public static final String ONLINE_SESSION = "online:session:";
+    // 离线消息
+    public static final String OFFLINE_MSG = "offline:msg:";
 }
