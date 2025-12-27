@@ -1,5 +1,6 @@
 package com.zy.im.infrastructure.ws;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zy.im.application.service.ConnectionService;
 import com.zy.im.application.service.MessageService;
@@ -22,6 +23,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     private final ConnectionService connectionService;
     private final MessageService messageService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 用户连接
@@ -53,18 +55,62 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message){
-        String payload = message.getPayload(); // 接收到的消息内容
-        log.info("收到消息: {}", payload);
+        try {
+            String payload = message.getPayload(); // 接收到的消息内容
+            log.info("收到消息: {}", payload);
 
-        // 创建 ChatMessage
-        ChatMessage chatMessage = parseChatMessage(payload);
+            JsonNode root = objectMapper.readTree(payload);
+            String type = root.get("type").asText();
 
-        // 解析 JWT Token，获取发送者信息
+            switch (type) {
+                case "CHAT" -> handleChat(session, root.get("data"));
+                case "READ" -> handleRead(session, root.get("data"));
+                default -> log.warn("未知 WebSocket 消息类型: {}", type);
+            }
+
+        } catch (Exception e) {
+            log.error("WebSocket 消息处理异常", e);
+        }
+    }
+
+//=======================private=========================
+    /**
+     * 处理聊天消息
+     */
+    private void handleChat(WebSocketSession session, JsonNode data) throws Exception {
+        ChatMessage chatMessage = objectMapper.treeToValue(data, ChatMessage.class);
+
         JwtUser jwtUser = JwtUtil.parseToken(getTokenFromSession(session));
-        chatMessage.setFromUserId(jwtUser.getUserId()); // 设置发送者ID
+        chatMessage.setFromUserId(jwtUser.getUserId());
 
-        // 将消息传递给目标用户
         messageService.onMessage(chatMessage);
+    }
+
+    /**
+     * 处理 READ 已读
+     */
+    private void handleRead(WebSocketSession session, JsonNode data) {
+
+        String msgId = data.get("msgId").asText();
+        log.info("收到 READ 回执, msgId={}", msgId);
+
+        messageService.onRead(msgId);
+    }
+
+
+    /**
+     * 解析消息信息
+     * @param payload 消息内容
+     * @return ChatMessage 对象
+     */
+    private ChatMessage parseChatMessage(String payload) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(payload, ChatMessage.class);
+        } catch (IOException e) {
+            log.error("消息体解析异常", e);
+            throw new IllegalArgumentException("消息异常");
+        }
     }
 
     /**
@@ -80,20 +126,5 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             return authorizationHeader.substring(7);
         }
         return null; // 如果没有 token，返回 null 或者可以抛出异常
-    }
-
-    /**
-     * 解析消息信息
-     * @param payload 消息内容
-     * @return ChatMessage 对象
-     */
-    private ChatMessage parseChatMessage(String payload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(payload, ChatMessage.class);
-        } catch (IOException e) {
-            log.error("消息体解析异常", e);
-            throw new IllegalArgumentException("消息异常");
-        }
     }
 }

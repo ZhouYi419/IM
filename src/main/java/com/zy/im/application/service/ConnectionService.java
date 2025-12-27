@@ -1,6 +1,7 @@
 package com.zy.im.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zy.im.common.JsonUtils;
 import com.zy.im.common.JwtUtil;
 import com.zy.im.common.security.JwtUser;
 import com.zy.im.domain.ChatMessage;
@@ -31,6 +32,7 @@ public class ConnectionService {
     public void onConnect(WebSocketSession session) {
         String token = getToken(session);
         log.info("获取到token{}",token);
+
         JwtUser jwtUser = JwtUtil.parseToken(token);
 
         Long userId = jwtUser.getUserId();
@@ -41,10 +43,12 @@ public class ConnectionService {
         List<String> offlineMessages = offlineMessageRepository.getOfflineMessages(userId, 10);
         for (String messageJson : offlineMessages) {
             try {
-                ChatMessage chatMessage = new ObjectMapper().readValue(messageJson, ChatMessage.class);
+                ChatMessage chatMessage = JsonUtils.MAPPER.readValue(messageJson, ChatMessage.class);
                 TextMessage textMessage = new TextMessage(chatMessage.getContent());
                 session.sendMessage(textMessage);  // 发送离线消息
                 log.info("离线消息发送给用户: {}", userId);
+                // 发送完成后清空
+                offlineMessageRepository.removeOfflineMessages(userId);
             } catch (IOException e) {
                 log.error("离线消息发送失败: {}", e.getMessage());
             }
