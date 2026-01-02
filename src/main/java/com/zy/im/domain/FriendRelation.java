@@ -4,26 +4,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class User extends BaseEntity implements Serializable {
-
+public class FriendRelation extends BaseEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     private Integer id;
+    // uuid
     private String uuid;
-    // 用户名
-    private String username;
-    // 密码
-    private String password;
-    // 状态
+    // 好友uuid
+    private String friendUuid;
+    // 好友状态 0正常 1已删除
     private Integer status;
-    // 创建时间
-    private LocalDateTime createdTime;
-    // 更新时间
-    private LocalDateTime updatedTime;
-
 }

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JwtUser {
-    private Long userId;
+    // 用户名
     private String username;
+    // 用户uuid
+    private String uuid;
 }

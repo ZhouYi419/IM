@@ -2,31 +2,23 @@ package com.zy.im.infrastructure.ws;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class WebSocketSessionManager {
-    private final Map<Long, WebSocketSession> userSessions = new ConcurrentHashMap<>();
 
-    // 添加用户session
-    public void addSession(Long userId, WebSocketSession session) {
-        userSessions.put(userId, session);
+    private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
+
+    public void add(String uuid , WebSocketSession session){
+        sessions.put(uuid,session);
     }
 
-    // 移除用户session
-    public void removeSession(Long userId) {
-        userSessions.remove(userId);
+    public void remove(String uuid , WebSocketSession session){
+        sessions.remove(uuid,session);
     }
 
-    // 获取用户session
-    public WebSocketSession getSession(Long userId) {
-        return userSessions.get(userId);
-    }
-
-    // 获取所有在线用户
-    public Collection<WebSocketSession> getAllSessions() {
-        return userSessions.values();
+    public WebSocketSession get(String uuid){
+        return sessions.get(uuid);
     }
 }

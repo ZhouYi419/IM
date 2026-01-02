@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
-    public BaseResponse<?> handleException(Exception e) {
+    public BaseResponse<?> handleException(BusinessException e) {
         return ResultUtils.error(500, "系统错误");
     }
 }

@@ -1,9 +1,13 @@
 package com.zy.im.common;
 
+import com.zy.im.common.exception.BusinessException;
+import com.zy.im.common.exception.ErrorCode;
 import com.zy.im.common.security.JwtUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.socket.WebSocketSession;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -24,9 +28,9 @@ public class JwtUtil {
     /**
      * 生成 Token
      */
-    public static String generateToken(Long userId, String username) {
+    public static String generateToken(String uuid, String username) {
         return Jwts.builder()
-                .setSubject(String.valueOf(userId))
+                .setSubject(uuid)
                 .claim("username", username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
@@ -45,18 +49,18 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody();
 
-            String userId = claims.getSubject();
-            log.info("获取到userId:{}",userId);
+            String uuid = claims.getSubject();
+            log.info("获取到uuid:{}",uuid);
             String username = claims.get("username", String.class);
-            return new JwtUser(Long.valueOf(userId), username);
+            return new JwtUser(username,uuid);
         } catch (JwtException e) {
             throw new RuntimeException("Invalid JWT token", e);
         }
     }
 
-    /** 获取 userId */
-    public static Long getUserId(String token) {
-        return parseToken(token).getUserId();
+    /** 获取 uuid */
+    public static String getUserId(String token) {
+        return parseToken(token).getUuid();
     }
 
     /** 获取 username */
@@ -81,5 +85,18 @@ public class JwtUtil {
         } catch (JwtException e) {
             throw new RuntimeException("Invalid JWT token", e);
         }
+    }
+
+    /**
+     * 获取请求头Token
+     * @return token
+     */
+    public static String getToken(WebSocketSession session){
+        String auth = session.getHandshakeHeaders().getFirst("Authorization");
+        if (auth != null && auth.startsWith("Bearer ")){
+            return auth.substring(7);
+        }
+
+        throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }
 }

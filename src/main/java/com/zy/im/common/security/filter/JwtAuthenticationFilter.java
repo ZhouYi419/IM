@@ -1,6 +1,8 @@
 package com.zy.im.common.security.filter;
 
 import com.zy.im.common.JwtUtil;
+import com.zy.im.common.security.JwtUser;
+import com.zy.im.common.security.UserContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            Long userId = JwtUtil.getUserId(token);
+            String uuid = JwtUtil.getUserId(token);
             String username = JwtUtil.getUsername(token);
 
-            if (userId != null) {
+            // 存入ThreadLocal
+            JwtUser jwtUser = JwtUtil.parseToken(token);
+            UserContext.set(jwtUser);
+
+            if (uuid != null) {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 username,

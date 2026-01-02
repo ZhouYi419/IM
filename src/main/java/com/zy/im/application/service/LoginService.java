@@ -26,7 +26,7 @@ public class LoginService {
             throw new BusinessException(ErrorCode.PASSWORD_ERROR);
         }
         // 生成 token
-        String token = JwtUtil.generateToken(user.getId(), user.getUsername());
+        String token = JwtUtil.generateToken(user.getUuid(), user.getUsername());
 
         // 获取 token 过期时间
         Long expired = JwtUtil.getExpiration(token);
