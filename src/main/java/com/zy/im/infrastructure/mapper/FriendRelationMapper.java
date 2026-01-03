@@ -23,4 +23,11 @@ public interface FriendRelationMapper {
     """)
     Integer isFriend(@Param("fromUuid") String fromUuid,
                      @Param("toUuid") String toUuid);
+
+    /**
+     * 插入好友数据
+     */
+    int insert(@Param("uuid") String uuid,
+               @Param("friendUuid") String friendUuid,
+               @Param("status") Integer status);
 }

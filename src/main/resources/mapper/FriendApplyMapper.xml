@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zy.im.infrastructure.mapper.FriendApplyMapper">
+
+    <select id="selectApplyList"
+            resultType="com.zy.im.api.dto.response.ApplyListResponse">
+        SELECT
+            f.from_uuid     AS applyUuid,
+            u.username      AS name,
+            u.avatar        AS avatar,
+            f.reason        AS reason,
+            f.created_time  AS applyTime
+        FROM friend_apply f
+                 JOIN user u
+                      ON u.uuid = f.from_uuid
+        WHERE f.to_uuid = #{toUuid}
+          AND f.status = 0
+        ORDER BY f.created_time DESC
+    </select>
+
+    <select id="selectApply" resultType="com.zy.im.domain.FriendApply">
+        SELECT *
+        FROM friend_apply
+        WHERE from_uuid = #{fromUuid}
+          AND to_uuid = #{toUuid}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE friend_apply
+        SET status = #{status}
+        WHERE from_uuid = #{fromUuid}
+          AND to_uuid = #{toUuid}
+    </update>
+
+
+</mapper>

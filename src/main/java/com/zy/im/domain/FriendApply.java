@@ -27,6 +27,11 @@ public class FriendApply extends BaseEntity implements Serializable {
     private String toUuid;
 
     /**
+     * 添加原因
+     */
+    private String reason;
+
+    /**
      * 状态：
      * 0 - 待处理
      * 1 - 同意

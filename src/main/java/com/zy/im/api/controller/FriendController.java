@@ -1,16 +1,16 @@
 package com.zy.im.api.controller;
 
+import com.zy.im.api.dto.request.AgreeFriendRequest;
 import com.zy.im.api.dto.request.ApplyFriendRequest;
+import com.zy.im.api.dto.response.ApplyListResponse;
 import com.zy.im.application.service.FriendService;
 import com.zy.im.common.BaseResponse;
 import com.zy.im.common.ResultUtils;
 import com.zy.im.common.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,12 +19,38 @@ public class FriendController {
 
     private final FriendService friendService;
 
+    /**
+     * 发起好友申请
+     * @param request 申请请求
+     * @return 申请结果
+     */
     @PostMapping("/apply")
     public BaseResponse<String> applyFriendRequest(@Validated @RequestBody ApplyFriendRequest request){
         String uuid = UserContext.getUserId();
         String applyUuid = request.getApplyUuid();
-        friendService.apply(uuid,applyUuid);
+        String reason = request.getReason();
+        friendService.apply(uuid,applyUuid,reason);
 
         return ResultUtils.success("好友申请已发送");
+    }
+
+    /**
+     * 获取好友申请列表
+     * @return 申请列表
+     */
+    @GetMapping("/apply-list")
+    public BaseResponse<List<ApplyListResponse>> getApplyList(){
+        String uuid = UserContext.getUserId();
+        return ResultUtils.success(friendService.getApplyList(uuid));
+    }
+
+    /**
+     * 同意好友申请
+     */
+    @PostMapping("/apply-agree")
+    public BaseResponse<String> agree(@RequestBody @Validated AgreeFriendRequest request) {
+        String toUuid = UserContext.getUserId();   // 当前用户（被申请人）
+        friendService.agreeApply(request.getApplyUuid(), toUuid);
+        return ResultUtils.success("成功");
     }
 }

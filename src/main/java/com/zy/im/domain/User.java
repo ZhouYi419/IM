@@ -19,6 +19,8 @@ public class User extends BaseEntity implements Serializable {
     private String username;
     // 密码
     private String password;
+    //头像
+    private String avatar;
     // 状态
     private Integer status;
     // 创建时间
