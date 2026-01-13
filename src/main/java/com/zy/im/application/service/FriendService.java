@@ -1,8 +1,11 @@
 package com.zy.im.application.service;
 
+import com.zy.im.api.dto.request.AgreeFriendRequest;
+import com.zy.im.api.dto.request.ApplyFriendRequest;
 import com.zy.im.api.dto.response.ApplyListResponse;
 import com.zy.im.common.exception.BusinessException;
 import com.zy.im.common.exception.ErrorCode;
+import com.zy.im.common.security.UserContext;
 import com.zy.im.domain.FriendApply;
 import com.zy.im.infrastructure.enums.FriendApplyStatus;
 import com.zy.im.infrastructure.enums.FriendStatus;
@@ -24,44 +27,45 @@ public class FriendService {
 
     /**
      * 发送好友申请
-     * @param fromUuid 申请人uuid
-     * @param toUuid 被申请人uuid
-     * @param reason 申请原因
      */
     @Transactional(rollbackFor = Exception.class)
-    public void apply(String fromUuid, String toUuid,String reason) {
+    public void apply(ApplyFriendRequest request) {
+        // 1.获取请求参数
+        String uuid = UserContext.getUserId();
+        String applyUuid = request.getApplyUuid();
+        String reason = request.getReason();
 
-        if (fromUuid == null){
+        if (uuid == null){
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户异常");
         }
 
         // 1. 不能加自己
-        if (fromUuid.equals(toUuid)) {
+        if (uuid.equals(applyUuid)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能添加自己为好友");
         }
 
         // 2. 对方是否存在
-        Integer userExist = userMapper.existsByUuid(toUuid);
+        Integer userExist = userMapper.existsByUuid(applyUuid);
         if (userExist == null || userExist == 0) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
 
         // 3. 是否已经是好友
-        Integer isFriend = FriendRelationMapper.isFriend(fromUuid, toUuid);
+        Integer isFriend = FriendRelationMapper.isFriend(uuid, applyUuid);
         if (isFriend != null && isFriend == 1) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "已经是好友");
         }
 
         // 4. 是否已申请过（待处理）
-        Integer isPending = friendApplyMapper.existsPending(fromUuid, toUuid);
+        Integer isPending = friendApplyMapper.existsPending(uuid, applyUuid);
         if (isPending != null && isPending == 1) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "已发送过好友申请");
         }
 
         // 5. 保存好友申请
         FriendApply apply = new FriendApply();
-        apply.setFromUuid(fromUuid);
-        apply.setToUuid(toUuid);
+        apply.setFromUuid(uuid);
+        apply.setToUuid(applyUuid);
         apply.setReason(reason);
         apply.setStatus(FriendApplyStatus.PENDING.getCode());
 
@@ -74,15 +78,22 @@ public class FriendService {
     /**
      * 获取好友申请列表
      */
-    public List<ApplyListResponse> getApplyList(String uuid) {
+    public List<ApplyListResponse> getApplyList() {
+        String uuid = UserContext.getUserId();
         return friendApplyMapper.selectApplyList(uuid);
     }
 
+    /**
+     * 同意好友申请
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void agreeApply(String fromUuid, String toUuid) {
+    public void agreeApply(AgreeFriendRequest request) {
+        // 1.获取请求参数
+        String uuid = UserContext.getUserId();
+        String fromUuid = request.getFromUuid();
 
         // 1. 查询申请记录
-        FriendApply apply = friendApplyMapper.selectApply(fromUuid, toUuid);
+        FriendApply apply = friendApplyMapper.selectApply(fromUuid, uuid);
         if (apply == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "好友申请不存在");
         }
@@ -93,13 +104,13 @@ public class FriendService {
         }
 
         // 3. 插入好友关系
-        FriendRelationMapper.insert(fromUuid, toUuid, FriendStatus.NORMAL.getCode());
-        FriendRelationMapper.insert(toUuid, fromUuid,FriendStatus.NORMAL.getCode());
+        FriendRelationMapper.insert(fromUuid, uuid, FriendStatus.NORMAL.getCode());
+        FriendRelationMapper.insert(uuid, fromUuid,FriendStatus.NORMAL.getCode());
 
         // 4. 更新申请状态
         friendApplyMapper.updateStatus(
                 fromUuid,
-                toUuid,
+                uuid,
                 FriendApplyStatus.ACCEPTED.getCode()
         );
     }

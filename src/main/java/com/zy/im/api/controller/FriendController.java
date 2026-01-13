@@ -26,11 +26,7 @@ public class FriendController {
      */
     @PostMapping("/apply")
     public BaseResponse<String> applyFriendRequest(@Validated @RequestBody ApplyFriendRequest request){
-        String uuid = UserContext.getUserId();
-        String applyUuid = request.getApplyUuid();
-        String reason = request.getReason();
-        friendService.apply(uuid,applyUuid,reason);
-
+        friendService.apply(request);
         return ResultUtils.success("好友申请已发送");
     }
 
@@ -40,8 +36,7 @@ public class FriendController {
      */
     @GetMapping("/apply-list")
     public BaseResponse<List<ApplyListResponse>> getApplyList(){
-        String uuid = UserContext.getUserId();
-        return ResultUtils.success(friendService.getApplyList(uuid));
+        return ResultUtils.success(friendService.getApplyList());
     }
 
     /**
@@ -49,8 +44,7 @@ public class FriendController {
      */
     @PostMapping("/apply-agree")
     public BaseResponse<String> agree(@RequestBody @Validated AgreeFriendRequest request) {
-        String toUuid = UserContext.getUserId();   // 当前用户（被申请人）
-        friendService.agreeApply(request.getApplyUuid(), toUuid);
+        friendService.agreeApply(request);
         return ResultUtils.success("成功");
     }
 }

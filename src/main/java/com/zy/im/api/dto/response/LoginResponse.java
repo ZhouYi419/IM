@@ -1,8 +1,10 @@
 package com.zy.im.api.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class LoginResponse {
     /**
      * token
@@ -13,9 +15,4 @@ public class LoginResponse {
      * 过期时间
      */
     private Long expired;
-
-    public LoginResponse(String token, Long expired) {
-        this.token = token;
-        this.expired = expired;
-    }
 }

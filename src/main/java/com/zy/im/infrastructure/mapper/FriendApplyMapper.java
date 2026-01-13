@@ -22,9 +22,9 @@ public interface FriendApplyMapper {
      * 插入好友申请记录
      */
     @Insert("INSERT INTO friend_apply " +
-            "(from_uuid, to_uuid,status)" +
+            "(from_uuid, to_uuid,status,reason)" +
             "VALUES " +
-            "(#{fromUuid}, #{toUuid},#{status})")
+            "(#{fromUuid}, #{toUuid},#{status},#{reason})")
     int insert(FriendApply friendApply);
 
 

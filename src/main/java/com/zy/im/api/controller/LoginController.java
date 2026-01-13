@@ -20,9 +20,8 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping("/login")
-    public BaseResponse<LoginResponse> login(@RequestBody @Validated LoginRequest loginRequest) {
-        String username = loginRequest.getUsername();
-        String password = loginRequest.getPassword();
-        return ResultUtils.success(loginService.login(username, password));
+    public BaseResponse<LoginResponse> login(@RequestBody @Validated LoginRequest request) {
+        LoginResponse response = loginService.login(request);
+        return ResultUtils.success(response);
     }
 }

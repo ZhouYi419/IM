@@ -26,6 +26,7 @@
         FROM friend_apply
         WHERE from_uuid = #{fromUuid}
           AND to_uuid = #{toUuid}
+        FOR UPDATE
     </select>
 
     <update id="updateStatus">
