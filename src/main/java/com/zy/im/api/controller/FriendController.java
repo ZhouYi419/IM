@@ -6,7 +6,6 @@ import com.zy.im.api.dto.response.ApplyListResponse;
 import com.zy.im.application.service.FriendService;
 import com.zy.im.common.BaseResponse;
 import com.zy.im.common.ResultUtils;
-import com.zy.im.common.security.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

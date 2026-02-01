@@ -40,7 +40,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         ChatMessage chatMessage = JsonUtils.fromJson(
                 message.getPayload(), ChatMessage.class
         );

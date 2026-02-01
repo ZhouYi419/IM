@@ -1,6 +1,7 @@
 package com.zy.im.infrastructure.mapper;
 
 import com.zy.im.domain.User;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -20,4 +21,19 @@ public interface UserMapper {
         LIMIT 1
     """)
     Integer existsByUuid(@Param("uuid") String uuid);
+
+    @Insert("""
+    INSERT INTO user (
+        uuid,
+        username,
+        password,
+        status
+    ) VALUES (
+        #{uuid},
+        #{username},
+        #{password},
+        #{status}
+        )
+    """)
+    Integer insertUser(User user);
 }

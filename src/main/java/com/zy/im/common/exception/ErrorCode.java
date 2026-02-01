@@ -8,6 +8,7 @@ public enum ErrorCode {
     // auth相关
     USER_NOT_FOUND(1001, "用户不存在"),
     PASSWORD_ERROR(1002, "密码错误"),
+    USER_ALREADY_REGISTER(1003, "用户已注册"),
 
     PARAMS_ERROR(40000, "请求参数错误"),
     NOT_LOGIN_ERROR(40100, "未登录"),

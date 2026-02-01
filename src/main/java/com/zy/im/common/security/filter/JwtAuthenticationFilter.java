@@ -30,8 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = JwtUtil.getUsername(token);
 
             // 存入ThreadLocal
-            JwtUser jwtUser = JwtUtil.parseToken(token);
-            UserContext.set(jwtUser);
+            if (UserContext.get() == null){
+                JwtUser jwtUser = JwtUtil.parseToken(token);
+                UserContext.set(jwtUser);
+            }
 
             if (uuid != null) {
                 UsernamePasswordAuthenticationToken authentication =
