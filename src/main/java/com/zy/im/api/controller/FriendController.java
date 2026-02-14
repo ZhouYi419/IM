@@ -1,7 +1,7 @@
 package com.zy.im.api.controller;
 
-import com.zy.im.api.dto.request.AgreeFriendRequest;
 import com.zy.im.api.dto.request.ApplyFriendRequest;
+import com.zy.im.api.dto.request.ProcessFriendRequest;
 import com.zy.im.api.dto.response.ApplyListResponse;
 import com.zy.im.application.service.FriendService;
 import com.zy.im.common.BaseResponse;
@@ -42,8 +42,17 @@ public class FriendController {
      * 同意好友申请
      */
     @PostMapping("/apply-agree")
-    public BaseResponse<String> agree(@RequestBody @Validated AgreeFriendRequest request) {
+    public BaseResponse<String> agree(@RequestBody @Validated ProcessFriendRequest request) {
         friendService.agreeApply(request);
-        return ResultUtils.success("成功");
+        return ResultUtils.success("ok");
+    }
+
+    /**
+     * 拒绝好友申请
+     */
+    @PostMapping("/apply-reject")
+    public BaseResponse<String> reject(@RequestBody @Validated ProcessFriendRequest request) {
+        friendService.rejectApply(request);
+        return ResultUtils.success("ok");
     }
 }

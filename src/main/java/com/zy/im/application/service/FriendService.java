@@ -1,7 +1,7 @@
 package com.zy.im.application.service;
 
-import com.zy.im.api.dto.request.AgreeFriendRequest;
 import com.zy.im.api.dto.request.ApplyFriendRequest;
+import com.zy.im.api.dto.request.ProcessFriendRequest;
 import com.zy.im.api.dto.response.ApplyListResponse;
 import com.zy.im.common.exception.BusinessException;
 import com.zy.im.common.exception.ErrorCode;
@@ -87,7 +87,7 @@ public class FriendService {
      * 同意好友申请
      */
     @Transactional(rollbackFor = Exception.class)
-    public void agreeApply(AgreeFriendRequest request) {
+    public void agreeApply(ProcessFriendRequest request) {
         // 1.获取请求参数
         String uuid = UserContext.getUserId();
         String fromUuid = request.getFromUuid();
@@ -112,6 +112,34 @@ public class FriendService {
                 fromUuid,
                 uuid,
                 FriendApplyStatus.ACCEPTED.getCode()
+        );
+    }
+
+    /**
+     * 拒绝好友申请
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectApply(ProcessFriendRequest request) {
+        // 1.获取请求参数
+        String uuid = UserContext.getUserId();
+        String fromUuid = request.getFromUuid();
+
+        // 1. 查询申请记录
+        FriendApply apply = friendApplyMapper.selectApply(fromUuid, uuid);
+        if (apply == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "好友申请不存在");
+        }
+
+        // 2. 状态校验
+        if (!(FriendApplyStatus.PENDING.getCode() == apply.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "该申请已处理");
+        }
+
+        // 3. 更新申请状态
+        friendApplyMapper.updateStatus(
+                fromUuid,
+                uuid,
+                FriendApplyStatus.REJECTED.getCode()
         );
     }
 }
